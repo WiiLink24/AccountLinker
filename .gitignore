@@ -1,0 +1,7 @@
+cmake-build-debug
+data/*.o
+data/*.s
+data/*.h
+*.dol
+*.elf
+.idea
