@@ -70,7 +70,6 @@ static void HaltGui() {
     if (guiHalt) {
       LWP_SuspendThread(guithread);
     } else {
-      UpdatePads();
       mainWindow->Draw();
 
       // Run this for loop only once
@@ -158,11 +157,35 @@ void InitGUIThreads() {
   u8 *buf = static_cast<u8 *>(malloc(sz + 1));
   fread(buf, 1, sz, fp);
 
+  GuiText titleTxt("WiiLink Account Linker", 28, {70, 187, 255, 255});
+  titleTxt.SetAlignment(ALIGN_CENTRE, ALIGN_TOP);
+  titleTxt.SetPosition(0, 25);
+
+  GuiText msgTxt("To finish creating your WiiLink Account, scan this QR code with a mobile device and follow the instructions there.", 20, (GXColor){0xff, 0xff, 0xff, 255});
+  msgTxt.SetAlignment(ALIGN_CENTRE, ALIGN_BOTTOM);
+  msgTxt.SetWrap(true, 500);
+  msgTxt.SetPosition(0, -150);
+
+  GuiText homeTxt("Press HOME to return to the Wii Menu", 30, {70, 187, 255, 255});
+  homeTxt.SetAlignment(ALIGN_CENTRE, ALIGN_BOTTOM);
+  homeTxt.SetPosition(0, -30);
+
   GuiImage *qr = new GuiImage(new GuiImageData(buf));
   qr->SetAlignment(ALIGN_CENTRE, ALIGN_CENTRE);
-  qr->SetPosition(0, 85);
+  qr->SetPosition(0, 90);
+
+  mainWindow->Append(&titleTxt);
+  mainWindow->Append(&msgTxt);
+  mainWindow->Append(&homeTxt);
   mainWindow->Append(qr);
 
-  while (true)
+  while (true) {
     usleep(THREAD_SLEEP);
+    WPAD_ScanPads();
+    u32 pressed = WPAD_ButtonsDown(0);
+    if (pressed & WPAD_BUTTON_HOME) {
+      ExitRequested = true;
+      exitType = WII_MENU;
+    }
+  }
 }

@@ -39,9 +39,10 @@ add_executable(dominos-account-linker
         qr.h
 )
 
-target_link_libraries(dominos-account-linker PRIVATE png gui `freetype-config --libs` wiiuse bte asnd ogc qrencode mbedcrypto z fat
+target_link_libraries(dominos-account-linker PRIVATE png gui `freetype-config --libs` wiiuse bte asnd ogc qrencode mbedcrypto z fat bz2
         # It absolutely hates glob here so we have to manually set it ourselves
         ${CMAKE_CURRENT_SOURCE_DIR}/data/channel_gradient_bottom.png.o
         ${CMAKE_CURRENT_SOURCE_DIR}/data/channel_gradient_top.png.o
         ${CMAKE_CURRENT_SOURCE_DIR}/data/bg_stripes.png.o
+        ${CMAKE_CURRENT_SOURCE_DIR}/data/noto_sans_jp_regular.otf.o
 )

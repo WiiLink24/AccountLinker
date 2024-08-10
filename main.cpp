@@ -1,6 +1,7 @@
 #include "gui/gui.h"
 #include "menu.h"
 #include "qr.h"
+#include "noto_sans_jp_regular.otf.h"
 #include <fat.h>
 #include <gccore.h>
 #include <iostream>
@@ -61,6 +62,7 @@ int main() {
 
   InitAudio();
   InitGUIThreads();
+  InitFreeType((u8 *)noto_sans_jp_regular_otf, noto_sans_jp_regular_otf_size);
   init_fat();
 
   // We first encode our URL to a PNG.
@@ -78,8 +80,8 @@ int main() {
   int width, height;
 
   u8 *png_data = readPNG("fat:/qr.png", width, height);
-  u8 *resized = resizeImage(png_data, width, height, 300, 300);
-  writePNG("fat:/qr.png", resized, 300, 300);
+  u8 *resized = resizeImage(png_data, width, height, 200, 200);
+  writePNG("fat:/qr.png", resized, 200, 200);
 
   MainMenu();
   return 0;
