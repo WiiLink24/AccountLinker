@@ -12,7 +12,7 @@
 #include "config.h"
 
 // URL for linking.
-constexpr char URL[] = "https://demae.wiilink.ca?h=";
+constexpr char URL[] = "https://accounts.wiilink.ca/link?h=";
 
 std::string HexToString(const std::vector<u8> &hex) {
   static constexpr std::array<char, 16> lookup = {'0', '1', '2', '3', '4', '5',
@@ -38,7 +38,7 @@ void encode_qr_code_to_png() {
   mbedtls_sha512_init(&ctx);
   mbedtls_sha512_starts(&ctx, 0);
   mbedtls_sha512_update(
-      &ctx, reinterpret_cast<const unsigned char *>(str.data()), str.length());
+          &ctx, reinterpret_cast<const unsigned char *>(str.data()), str.length());
 
   std::vector<u8> vec(64);
   mbedtls_sha512_finish(&ctx, vec.data());
@@ -47,7 +47,7 @@ void encode_qr_code_to_png() {
   string.append(HexToString(vec));
 
   QRcode *qr =
-      QRcode_encodeString(string.data(), 1, QR_ECLEVEL_L, QR_MODE_8, 0);
+          QRcode_encodeString(string.data(), 1, QR_ECLEVEL_L, QR_MODE_8, 0);
   if (qr == nullptr) {
     exit(0);
   }
@@ -58,7 +58,7 @@ void encode_qr_code_to_png() {
   unsigned char *row, *p, *q;
   int x, y, xx, yy, bit;
   int realwidth;
-  const int margin = 0;
+  const int margin = 4; // Adjust this value to increase/decrease border size
   const int size = 1;
 
   realwidth = (qr->width + margin * 2) * size;
@@ -102,17 +102,17 @@ void encode_qr_code_to_png() {
                PNG_FILTER_TYPE_DEFAULT);
   png_write_info(png_ptr, info_ptr);
 
-  /* top margin */
+  /* Top margin (white border) */
   memset(row, 0xff, (realwidth + 7) / 8);
   for (y = 0; y < margin * size; y++) {
     png_write_row(png_ptr, row);
   }
 
-  /* data */
+  /* Data */
   p = qr->data;
   for (y = 0; y < qr->width; y++) {
     bit = 7;
-    memset(row, 0xff, (realwidth + 7) / 8);
+    memset(row, 0xff, (realwidth + 7) / 8); // Initialize row to white
     q = row;
     q += margin * size / 8;
     bit = 7 - (margin * size % 8);
@@ -131,7 +131,8 @@ void encode_qr_code_to_png() {
       png_write_row(png_ptr, row);
     }
   }
-  /* bottom margin */
+
+  /* Bottom margin (white border) */
   memset(row, 0xff, (realwidth + 7) / 8);
   for (y = 0; y < margin * size; y++) {
     png_write_row(png_ptr, row);
