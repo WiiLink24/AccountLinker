@@ -2,7 +2,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <format>
 #include <gccore.h>
+#include <mbedtls/sha1.h>
 #include <mbedtls/sha512.h>
 #include <mbedtls/base64.h>
 
@@ -10,13 +12,15 @@ static fstats stats ATTRIBUTE_ALIGN(32);
 constexpr s32 ISFS_EEXIST = -105;
 constexpr s32 ISFS_ENOENT = -106;
 
-void *ISFS_GetFile(const char *path, u32 *size) {
-  *size = 0;
+File* ISFS_GetFile(std::string_view path) {
+  u32 size{};
+  File* file = new File();
 
-  s32 fd = ISFS_Open(path, ISFS_OPEN_READ);
+  s32 fd = ISFS_Open(path.data(), ISFS_OPEN_READ);
   if (fd < 0) {
-    printf("ISFS_GetFile: unable to open file (error %d)\n", fd);
-    return nullptr;
+    file->error = std::format("ISFS_GetFile: unable to open file {} (error {})\n", path, fd);
+    file->error_code = fd;
+    return file;
   }
 
   void *buf = nullptr;
@@ -38,35 +42,42 @@ void *ISFS_GetFile(const char *path, u32 *size) {
 
     if (buf != nullptr) {
       s32 tmp_size = ISFS_Read(fd, buf, length);
-
       if (tmp_size == length) {
         // We were successful.
-        *size = tmp_size;
+        size = tmp_size;
       } else {
         // If positive, the file could not be fully read.
         // If negative, it is most likely an underlying /dev/fs
         // error.
         if (tmp_size >= 0) {
-          printf("ISFS_GetFile: only able to read %d out of "
-                 "%d bytes!\n",
-                 tmp_size, length);
+          file->error = std::format("ISFS_GetFile: only able to read {} out of {} bytes!", tmp_size, length);
+          file->error_code = tmp_size;
         } else if (tmp_size == ISFS_ENOENT) {
-          // We ignore logging errors about files that do not exist.
+          file->error = std::format("ISFS_GetFile: file not found (error {})", tmp_size);
+          file->error_code = tmp_size;
         } else {
-          printf("ISFS_GetFile: ISFS_Open failed! (error %d)\n", tmp_size);
+          file->error = std::format("ISFS_GetFile: ISFS_Open failed! (error {})", tmp_size);
+          file->error_code = tmp_size;
         }
 
         free(buf);
       }
     } else {
-      printf("ISFS_GetFile: failed to allocate buffer!\n");
+      file->error = "ISFS_GetFile: failed to allocate buffer!";
+      file->error_code = -1;
     }
   } else {
-    printf("ISFS_GetFile: unable to retrieve file stats (error %d)\n", ret);
+    file->error = std::format("ISFS_GetFile: unable to retrieve file stats (error {})", ret);
+    file->error_code = ret;
   }
   ISFS_Close(fd);
 
-  return buf;
+  if (!file->error_code != 0) {
+    file->data = buf;
+    file->size = size;
+  }
+
+  return file;
 }
 
 inline std::string HexToString(const std::vector<u8> &hex) {
@@ -107,4 +118,15 @@ std::string Base64Encode(const unsigned char* data, size_t size) {
   mbedtls_base64_encode(vec.data(), vec.size(), &output_length, data, size);
 
   return {reinterpret_cast<char*>(vec.data()), output_length};
+}
+
+std::array<u8, 160 / 8> SHA1Digest(const u8* msg, size_t len) {
+  mbedtls_sha1_context ctx{};
+  mbedtls_sha1_init(&ctx);
+  mbedtls_sha1_starts(&ctx);
+  mbedtls_sha1_update(&ctx, msg, len);
+
+  std::array<u8, 160/8> vec{};
+  mbedtls_sha1_finish(&ctx, vec.data());
+  return vec;
 }

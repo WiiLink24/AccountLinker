@@ -9,6 +9,7 @@
 #include <wiiuse/wpad.h>
 #include <ogcsys.h>
 
+#include "iosc.h"
 #include "utils.h"
 
 static void *xfb = nullptr;
@@ -70,6 +71,7 @@ int main() {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     wiisocket_init();
 
+
     OAuth oauth{};
     if (!oauth.StartDeviceFlow()) {
         const std::string msg = "Starting the device flow " + oauth.GetErrorMessage();
@@ -82,9 +84,30 @@ int main() {
     LWP_CreateThread(&oauth_poll_thread, PollOAuth, &oauth, nullptr, 0, 50);
     LWP_JoinThread(oauth_poll_thread, nullptr);
 
-    auto ret = GetAuthTokenSignature();
+
+    // We will now get the keys.
+    // First we try if this is a real Wii.
+    std::pair<std::string, bool> ret{};
+
+    WiiOTP otp{};
+    otp_read(0, OTP_WORD_COUNT, otp.data);
+    if (otp.device_id != 0) {
+        // Is a Wii.
+        ret = GetAuthTokenSignature(otp.device_private_key);
+    } else {
+        // We are on Dolphin.
+        File* keys = ISFS_GetFile("/keys.bin");
+        if (keys->error_code != 0) {
+            // If the file doesn't exist, we can assume this NAND is a default one.
+            DisplayError(keys->error);
+        }
+
+        auto* dump = static_cast<IOSC::BootMiiKeyDump*>(keys->data);
+        ret = GetAuthTokenSignature(dump->ng_priv.data());
+    }
+
     if (ret.second) {
-        std::cout << ret.first << std::endl;
+        DisplayError(ret.first);
     }
 
     oauth.PerformLink(ret.first);

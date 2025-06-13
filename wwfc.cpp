@@ -4,6 +4,8 @@
 #include <format>
 #include <iostream>
 #include <ogcsys.h>
+
+#include "iosc.h"
 #include "utils.h"
 
 // From: https://github.com/WiiLink24/wfc-patcher-wii/blob/main/payload%2FwwfcLogin.cpp
@@ -40,7 +42,7 @@ static bool IsZeroBlock(const void* block, u32 size)
     return true;
 }
 
-std::pair<std::string, bool> GetAuthTokenSignature() {
+std::pair<std::string, bool> GetAuthTokenSignature(const u8* key) {
     struct IOSCECCCert {
         u32 signatureType;
         u8 signature[0x3C];
@@ -119,11 +121,7 @@ std::pair<std::string, bool> GetAuthTokenSignature() {
     eccCert = {};
 
 
-    ret = ES_Sign(&authTokenAligned, authTokenSize, eccSignature, reinterpret_cast<signed_blob *>(&eccCert));
-    if (ret < 0) {
-        return {std::format("ES_Sign failed with: {}", ret), true};
-    }
-
+    IOSC::Sign(key, eccSignature, reinterpret_cast<u8*>(&eccCert), 0, reinterpret_cast<const u8 *>(&authTokenAligned), authTokenSize, authSig.caId, authSig.msId, authSig.deviceId);
     authSig.appTitleId = DecodeUintString(eccCert.name + 2, 64);
     authSig.appTimestamp = eccCert.timestamp;
 

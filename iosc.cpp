@@ -7,6 +7,8 @@
 #include <cstring>
 #include <format>
 
+#include "utils.h"
+
 namespace IOSC {
     // https://github.com/dolphin-emu/dolphin/blob/a16387741383ca00524f78f9854c55be7089cf93/Source/Core/Core/IOS/IOSC.cpp#L508
     CertECC MakeBlankEccCert(std::string_view issuer, std::string_view name, const u8 *private_key, u32 key_id) {
@@ -21,8 +23,7 @@ namespace IOSC {
     }
 
     // https://github.com/dolphin-emu/dolphin/blob/a16387741383ca00524f78f9854c55be7089cf93/Source/Core/Core/IOS/IOSC.cpp#L530
-    void Sign(u8 *sig_out, u8 *ap_cert_out, u64 title_id, const u8 *data, u32 data_size, u32 ca_id, u32 ms_id, u32 device_id) {
-        /*
+    void Sign(const u8* console_key, u8 *sig_out, u8 *ap_cert_out, u64 title_id, const u8 *data, u32 data_size, u32 ca_id, u32 ms_id, u32 device_id) {
         std::array<u8, 30> ap_priv{};
 
         ap_priv[0x1d] = 1;
@@ -34,16 +35,15 @@ namespace IOSC {
         // Sign the AP cert.
         const size_t skip = offsetof(CertECC, signature.issuer);
         const auto ap_cert_digest =
-            SHA1::CalculateDigest(reinterpret_cast<const u8*>(&cert) + skip, sizeof(cert) - skip);
+            SHA1Digest(reinterpret_cast<const u8*>(&cert) + skip, sizeof(cert) - skip);
         cert.signature.sig =
-            ec::Sign(m_key_entries[HANDLE_CONSOLE_KEY].data.data(), ap_cert_digest.data());
+            ec::Sign(console_key, ap_cert_digest.data());
         std::memcpy(ap_cert_out, &cert, sizeof(cert));
 
         // Sign the data.
-        const auto data_digest = SHA1::CalculateDigest(data, data_size);
+        const auto data_digest = SHA1Digest(data, data_size);
         const auto signature = ec::Sign(ap_priv.data(), data_digest.data());
         std::ranges::copy(signature, sig_out);
-        */
     }
 
 }

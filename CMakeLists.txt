@@ -34,7 +34,7 @@ add_executable(WiiLinkAccountLinker
         ecc.cpp
         iosc.cpp
         otp.cpp
-        otp.h
+        bn.cpp
 )
 
 target_link_libraries(WiiLinkAccountLinker

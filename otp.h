@@ -1,5 +1,7 @@
 #pragma once
 
+// Thank you to thepikachugamer for this OTP code from their nanddumper
+// https://github.com/Naim2000/nanddumper_ios/blob/master/source/otp.h
 #include <stdint.h>
 
 #define OTP_WORD_COUNT 32

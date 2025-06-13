@@ -12,8 +12,8 @@ enum class NWC24CreationStage : u32 {
 
 class NWC24Config final {
 public:
-  explicit NWC24Config();
-  void ReadConfig();
+  NWC24Config() = default;
+  bool ReadConfig();
 
   std::string_view GetPassword() const;
 
