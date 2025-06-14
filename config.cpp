@@ -18,4 +18,4 @@ bool NWC24Config::ReadConfig() {
   return true;
 }
 
-std::string_view NWC24Config::GetPassword() const { return {m_data.paswd}; }
+u64 NWC24Config::GetWiiNumber() const { return {m_data.nwc24_id}; }

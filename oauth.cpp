@@ -52,8 +52,6 @@ void OAuth::PollToken() {
   m_response = http_post(TOKEN_PATH, post_data, headers);
   if ((m_response.status_code != 200 && m_response.status_code != 400) || m_response.curl_code != CURLE_OK) {
     // JSON will probably be empty. Return and display message.
-    std::cout << m_response.status_code << " " << m_response.curl_code << std::endl;
-    std::cout << m_response.resp << std::endl;
     return;
   }
 
@@ -64,7 +62,7 @@ void OAuth::PollToken() {
   }
 }
 
-void OAuth::PerformLink(std::string_view wwfc_cert) {
+bool OAuth::PerformLink(std::string_view wwfc_cert) {
   std::vector<std::string> headers = {
     "User-Agent: WiiLink Account Linker v0.1",
     "Accept: application/json",
@@ -73,15 +71,19 @@ void OAuth::PerformLink(std::string_view wwfc_cert) {
   };
 
   auto *config = new NWC24Config();
+  if (!config->ReadConfig()) {
+    return false;
+  }
 
   // Create our payload
   std::cout << wwfc_cert.size() << std::endl;
-  const std::string post_data = std::format("wii_num={}&cert={}", SHA512Encode(config->GetPassword()), curl_easy_escape(nullptr, wwfc_cert.data(), wwfc_cert.length()));
+  const std::string post_data = std::format("wii_num={}&cert={}", config->GetWiiNumber(), curl_easy_escape(nullptr, wwfc_cert.data(), wwfc_cert.length()));
 
   m_response = http_post(USER_UPDATE_PATH, post_data, headers);
   std::cout << m_response.status_code << std::endl;
   std::cout << m_response.curl_code << std::endl;
   std::cout << m_response.j.dump(4) << std::endl;
+  return true;
 }
 
 

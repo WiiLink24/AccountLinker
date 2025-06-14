@@ -120,7 +120,6 @@ std::pair<std::string, bool> GetAuthTokenSignature(const u8* key) {
 
     eccCert = {};
 
-
     IOSC::Sign(key, eccSignature, reinterpret_cast<u8*>(&eccCert), 0, reinterpret_cast<const u8 *>(&authTokenAligned), authTokenSize, authSig.caId, authSig.msId, authSig.deviceId);
     authSig.appTitleId = DecodeUintString(eccCert.name + 2, 64);
     authSig.appTimestamp = eccCert.timestamp;

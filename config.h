@@ -15,7 +15,7 @@ public:
   NWC24Config() = default;
   bool ReadConfig();
 
-  std::string_view GetPassword() const;
+  u64 GetWiiNumber() const;
 
 private:
   enum {

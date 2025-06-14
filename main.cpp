@@ -14,6 +14,7 @@
 
 static void *xfb = nullptr;
 static GXRModeObj *rmode = nullptr;
+static bool authenticated = false;
 static lwp_t oauth_poll_thread = LWP_THREAD_NULL;
 static lwp_t wii_remote_poll_thread = LWP_THREAD_NULL;
 
@@ -28,7 +29,17 @@ static lwp_t wii_remote_poll_thread = LWP_THREAD_NULL;
 }
 
 static void* ThreadedPollHomeButton(void *arg) {
-    poll_home_button();
+    while (true) {
+        if (authenticated) {
+            return nullptr;
+        }
+
+        WPAD_ScanPads();
+        const u32 pressed = WPAD_ButtonsDown(0);
+        if (pressed & WPAD_BUTTON_HOME)
+            exit(0);
+        VIDEO_WaitVSync();
+    }
 }
 
 static void* PollOAuth(void *arg) {
@@ -37,7 +48,8 @@ static void* PollOAuth(void *arg) {
         sleep(auth->GetInterval());
         auth->PollToken();
         if (auth->IsAuthenticated()) {
-            std::cout << "Authenticated!!!" << std::endl;
+            std::cout << "Account authenticated." << std::endl;
+            authenticated = true;
             return nullptr;
         }
     }

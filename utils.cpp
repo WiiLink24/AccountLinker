@@ -96,19 +96,6 @@ inline std::string HexToString(const std::vector<u8> &hex) {
   return str;
 }
 
-std::string SHA512Encode(std::string_view str) {
-  mbedtls_sha512_context ctx{};
-  mbedtls_sha512_init(&ctx);
-  mbedtls_sha512_starts(&ctx, 0);
-  mbedtls_sha512_update(
-          &ctx, reinterpret_cast<const unsigned char *>(str.data()), str.length());
-
-  std::vector<u8> vec(64);
-  mbedtls_sha512_finish(&ctx, vec.data());
-
-  return HexToString(vec);
-}
-
 std::string Base64Encode(const unsigned char* data, size_t size) {
   size_t output_length;
   mbedtls_base64_encode(nullptr, 0, &output_length, data, size);
