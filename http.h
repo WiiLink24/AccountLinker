@@ -18,4 +18,3 @@ struct HTTPResponse {
 
 static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output);
 HTTPResponse http_post(std::string_view url, std::string_view post_data, const std::vector<std::string>& headers);
-HTTPResponse http_get(std::string_view url, const std::vector<std::string>& headers);
