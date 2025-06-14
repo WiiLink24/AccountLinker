@@ -18,6 +18,13 @@ static bool authenticated = false;
 static lwp_t oauth_poll_thread = LWP_THREAD_NULL;
 static lwp_t wii_remote_poll_thread = LWP_THREAD_NULL;
 
+static void DisplayError(std::string_view message) {
+    std::cerr << message << std::endl;
+    std::cout << "Please join the WiiLink Discord for support." << std::endl;
+    std::cout << "Server Link: https://discord.gg/reqUMqxu8D" << std::endl << std::endl ;
+    std::cout << "Press the HOME Button to exit." << std::endl;
+}
+
 [[noreturn]] void poll_home_button() {
     while (true) {
         WPAD_ScanPads();
@@ -46,20 +53,19 @@ static void* PollOAuth(void *arg) {
     OAuth* auth = static_cast<OAuth*>(arg);
     while (true) {
         sleep(auth->GetInterval());
-        auth->PollToken();
+        bool ret = auth->PollToken();
+        if (!ret) {
+            const std::string msg = "Polling the device flow " + auth->GetErrorMessage();
+            DisplayError(msg);
+            while (true) {}
+        }
+
         if (auth->IsAuthenticated()) {
-            std::cout << "Account authenticated." << std::endl;
+            std::cout << "Account authenticated." << std::endl << std::endl;
             authenticated = true;
             return nullptr;
         }
     }
-}
-
-static void DisplayError(std::string_view message) {
-    std::cerr << message << std::endl;
-    std::cout << "Please join the WiiLink Discord for support." << std::endl;
-    std::cout << "Server Link: https://discord.gg/reqUMqxu8D" << std::endl << std::endl ;
-    std::cout << "Press the HOME Button to exit." << std::endl;
 }
 
 int main() {
@@ -117,6 +123,7 @@ int main() {
         if (keys->error_code != 0) {
             // If the file doesn't exist, we can assume this NAND is a default one.
             DisplayError(keys->error);
+            poll_home_button();
         }
 
         auto* dump = static_cast<IOSC::BootMiiKeyDump*>(keys->data);
@@ -125,10 +132,17 @@ int main() {
 
     if (ret.second) {
         DisplayError(ret.first);
+        poll_home_button();
     }
 
-    oauth.PerformLink(ret.first);
+    bool success = oauth.PerformLink(ret.first);
+    if (!success) {
+        const std::string msg = "Linking the Wii " + oauth.GetErrorMessage();
+        DisplayError(msg);
+    }
 
+    std::cout << "Wii successfully linked! Enjoy WiiLink Accounts!" << std::endl << std::endl;
+    std::cout << "Press the HOME button to exit." << std::endl;
     poll_home_button();
     return 0;
 }

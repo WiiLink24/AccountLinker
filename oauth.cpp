@@ -34,7 +34,8 @@ std::string OAuth::GetErrorMessage() const{
   // Server will respond with 400 Bad Request when the user has not completed the flow.
   // Only check if Curl succeeded.
   if (m_response.status_code != 200 && m_response.curl_code == CURLE_OK) {
-    return std::format("failed with HTTP response code: {}", m_response.status_code);
+    std::string err = m_response.j["error"];
+    return std::format("failed with HTTP response code: {}\nError: {}", m_response.status_code, err);
   }
 
   // If we got here Curl failed.
@@ -42,7 +43,7 @@ std::string OAuth::GetErrorMessage() const{
 }
 
 
-void OAuth::PollToken() {
+bool OAuth::PollToken() {
   const std::string post_data = std::format("grant_type=urn:ietf:params:oauth:grant-type:device_code&client_id={}&device_code={}", CLIENT_ID, GetDeviceCode());
   std::vector<std::string> headers = {
           "User-Agent: WiiLink Account Linker v0.1",
@@ -52,7 +53,7 @@ void OAuth::PollToken() {
   m_response = http_post(TOKEN_PATH, post_data, headers);
   if ((m_response.status_code != 200 && m_response.status_code != 400) || m_response.curl_code != CURLE_OK) {
     // JSON will probably be empty. Return and display message.
-    return;
+    return false;
   }
 
   // Retrieve data
@@ -60,6 +61,8 @@ void OAuth::PollToken() {
     m_access_token = m_response.j["access_token"];
     m_authenticated = true;
   }
+
+  return true;
 }
 
 bool OAuth::PerformLink(std::string_view wwfc_cert) {
@@ -76,14 +79,16 @@ bool OAuth::PerformLink(std::string_view wwfc_cert) {
   }
 
   // Create our payload
-  std::cout << wwfc_cert.size() << std::endl;
   const std::string post_data = std::format("wii_num={}&cert={}", config->GetWiiNumber(), curl_easy_escape(nullptr, wwfc_cert.data(), wwfc_cert.length()));
 
   m_response = http_post(USER_UPDATE_PATH, post_data, headers);
-  std::cout << m_response.status_code << std::endl;
-  std::cout << m_response.curl_code << std::endl;
-  std::cout << m_response.j.dump(4) << std::endl;
-  return true;
+  if (m_response.status_code != 200 || m_response.curl_code != CURLE_OK) {
+    // JSON will probably be empty. Return and display message.
+    return false;
+  }
+
+  bool success = m_response.j["success"];
+  return success;
 }
 
 

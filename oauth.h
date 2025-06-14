@@ -7,7 +7,7 @@ class OAuth {
 public:
     OAuth() = default;
     bool StartDeviceFlow();
-    void PollToken();
+    bool PollToken();
     bool PerformLink(std::string_view wwfc_cert);
     std::string GetErrorMessage() const;
     std::string_view GetUserCode() const;
