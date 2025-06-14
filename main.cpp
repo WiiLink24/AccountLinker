@@ -139,6 +139,7 @@ int main() {
     if (!success) {
         const std::string msg = "Linking the Wii " + oauth.GetErrorMessage();
         DisplayError(msg);
+        poll_home_button();
     }
 
     std::cout << "Wii successfully linked! Enjoy WiiLink Accounts!" << std::endl << std::endl;
