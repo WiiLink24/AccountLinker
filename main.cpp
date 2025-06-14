@@ -15,6 +15,7 @@
 static void *xfb = nullptr;
 static GXRModeObj *rmode = nullptr;
 static lwp_t oauth_poll_thread = LWP_THREAD_NULL;
+static lwp_t wii_remote_poll_thread = LWP_THREAD_NULL;
 
 [[noreturn]] void poll_home_button() {
     while (true) {
@@ -24,6 +25,10 @@ static lwp_t oauth_poll_thread = LWP_THREAD_NULL;
             exit(0);
         VIDEO_WaitVSync();
     }
+}
+
+static void* ThreadedPollHomeButton(void *arg) {
+    poll_home_button();
 }
 
 static void* PollOAuth(void *arg) {
@@ -71,7 +76,6 @@ int main() {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     wiisocket_init();
 
-
     OAuth oauth{};
     if (!oauth.StartDeviceFlow()) {
         const std::string msg = "Starting the device flow " + oauth.GetErrorMessage();
@@ -81,9 +85,10 @@ int main() {
 
     std::cout << "Please visit https://sso.riiconnect24.net/device" << std::endl << "and enter the following code: " << oauth.GetUserCode() << std::endl;
 
-    LWP_CreateThread(&oauth_poll_thread, PollOAuth, &oauth, nullptr, 0, 50);
+    // Spawn a thread for polling OAuth, and one for polling the Wii Remote.
+    LWP_CreateThread(&oauth_poll_thread, PollOAuth, &oauth, nullptr, 0, 80);
+    LWP_CreateThread(&wii_remote_poll_thread, ThreadedPollHomeButton, nullptr, nullptr, 0, 30);
     LWP_JoinThread(oauth_poll_thread, nullptr);
-
 
     // We will now get the keys.
     // First we try if this is a real Wii.
