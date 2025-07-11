@@ -19,9 +19,10 @@ static lwp_t oauth_poll_thread = LWP_THREAD_NULL;
 static lwp_t wii_remote_poll_thread = LWP_THREAD_NULL;
 
 static void DisplayError(std::string_view message) {
+    std::cout << "An error has occurred:" << std::endl;
     std::cerr << message << std::endl;
     std::cout << "Please join the WiiLink Discord for support." << std::endl;
-    std::cout << "Server Link: https://discord.gg/reqUMqxu8D" << std::endl << std::endl ;
+    std::cout << "Server Link: https://discord.gg/wiilink" << std::endl << std::endl ;
     std::cout << "Press the HOME Button to exit." << std::endl;
 }
 
@@ -85,23 +86,23 @@ int main() {
     VIDEO_WaitVSync();
     if(rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
 
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << "WiiLink Account Linker - (c) 2025 WiiLink" << std::endl;
-    std::cout << "v2.0" << std::endl;
-    std::cout << std::endl;
+    PrintHeader();
+    std::cout << "Please wait a moment while we initialize..." << std::endl;
+
     curl_global_init(CURL_GLOBAL_DEFAULT);
     wiisocket_init();
 
     OAuth oauth{};
-    if (!oauth.StartDeviceFlow()) {
+    bool success = oauth.StartDeviceFlow();
+    ClearScreen();
+    PrintHeader();
+    if (!success) {
         const std::string msg = "Starting the device flow " + oauth.GetErrorMessage();
         DisplayError(msg);
         poll_home_button();
     }
 
-    std::cout << "Please visit https://sso.riiconnect24.net/device" << std::endl << "and enter the following code: " << oauth.GetUserCode() << std::endl;
+    std::cout << "Please visit https://accounts.wiilink.ca/link" << std::endl << "and enter the following code: " << oauth.GetUserCode() << std::endl;
 
     // Spawn a thread for polling OAuth, and one for polling the Wii Remote.
     LWP_CreateThread(&oauth_poll_thread, PollOAuth, &oauth, nullptr, 0, 80);
@@ -135,7 +136,7 @@ int main() {
         poll_home_button();
     }
 
-    bool success = oauth.PerformLink(ret.first);
+    success = oauth.PerformLink(ret.first);
     if (!success) {
         const std::string msg = "Linking the Wii " + oauth.GetErrorMessage();
         DisplayError(msg);
