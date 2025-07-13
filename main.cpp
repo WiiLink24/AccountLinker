@@ -122,8 +122,14 @@ int main() {
         // We are on Dolphin.
         File* keys = ISFS_GetFile("/keys.bin");
         if (keys->error_code != 0) {
-            // If the file doesn't exist, we can assume this NAND is a default one.
-            DisplayError(keys->error);
+            if (keys->error_code == -106) {
+                // If the file doesn't exist, we can assume this NAND is a default one.
+                DisplayError("This is a default Dolphin NAND. Please use a NAND dump from your Wii.\n");
+            } else {
+                // Some other underlying ISFS error
+                DisplayError(keys->error);
+            }
+
             poll_home_button();
         }
 

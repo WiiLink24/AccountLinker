@@ -30,9 +30,8 @@ private:
 
     static constexpr char TOKEN_PATH[] = "https://sso.riiconnect24.net/application/o/token/";
     static constexpr char DEVICE_PATH[] = "https://sso.riiconnect24.net/application/o/device/";
-    static constexpr char USER_ID_PATH[] = "https://sso.riiconnect24.net/api/v3/core/users/me/";
-    static constexpr char USER_UPDATE_PATH[] = "http://localhost:9011/link/wii";
+    static constexpr char USER_UPDATE_PATH[] = "http://accounts.wiilink.ca/link/wii";
 
     // Production is ChGKaNcTcArxLCWSxAbvXXtbWKsM1xcy6x7k8ssn
-    static constexpr char CLIENT_ID[] = "fBBy1hJf5Ay9JFYkQpHmeExgE1Kr7KUb4f6Ngzar";
+    static constexpr char CLIENT_ID[] = "ChGKaNcTcArxLCWSxAbvXXtbWKsM1xcy6x7k8ssn";
 };
