@@ -9,14 +9,22 @@ bool OAuth::StartDeviceFlow() {
   const std::string post_data = std::format("client_id={}&scope=openid+profile+email+goauthentik.io/api", CLIENT_ID);
 
   std::vector<std::string> headers = {
-    "User-Agent: WiiLink Account Linker v0.1",
+    std::format("User-Agent: WiiLink Account Linker {}", version),
     "Content-Type: application/x-www-form-urlencoded"
 };
 
-  m_response = http_post(DEVICE_PATH, post_data, headers);
-  if (m_response.status_code != 200 || m_response.curl_code != CURLE_OK) {
-    // JSON will probably be empty. Return and display message.
-    return false;
+  for (int tries = 0; tries < 5; tries++) {
+    // We do multiple tries here, as sometimes SSO returns 502 for whatever reason
+    m_response = http_post(DEVICE_PATH, post_data, headers);
+
+    if (m_response.status_code == 200 && m_response.curl_code == CURLE_OK) {
+      break;
+    }
+
+    if (tries == 4) {
+      // JSON will probably be empty. Return and display message.
+      return false;
+    }
   }
 
   m_device_code = m_response.j["device_code"];
@@ -46,7 +54,7 @@ std::string OAuth::GetErrorMessage() const{
 bool OAuth::PollToken() {
   const std::string post_data = std::format("grant_type=urn:ietf:params:oauth:grant-type:device_code&client_id={}&device_code={}", CLIENT_ID, GetDeviceCode());
   std::vector<std::string> headers = {
-          "User-Agent: WiiLink Account Linker v0.1",
+          std::format("User-Agent: WiiLink Account Linker {}", version),
           "Content-Type: application/x-www-form-urlencoded"
   };
 
@@ -67,7 +75,7 @@ bool OAuth::PollToken() {
 
 bool OAuth::PerformLink(std::string_view wwfc_cert) {
   std::vector<std::string> headers = {
-    "User-Agent: WiiLink Account Linker v0.1",
+    std::format("User-Agent: WiiLink Account Linker {}", version),
     "Accept: application/json",
     "Content-Type: application/x-www-form-urlencoded",
     std::format("Authorization: {}", m_access_token),

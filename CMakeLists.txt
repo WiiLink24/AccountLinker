@@ -15,6 +15,7 @@ set(CMAKE_ASM_FLAGS "-x assembler-with-cpp")
 set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-function -O2 ${CMAKE_CXX_FLAGS} ${MACHDEP}")
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-function -O2 ${CMAKE_CXX_FLAGS} ${MACHDEP} -fdiagnostics-color")
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/apps/wiilink-account-linker")
 
 include_directories(${LIBOGCDIR}/include)
 include_directories(${DEVKITPRO}/portlibs/wii/include)
@@ -38,5 +39,5 @@ add_executable(WiiLinkAccountLinker
 )
 
 target_link_libraries(WiiLinkAccountLinker
-        PRIVATE curl wiisocket mbedtls mbedcrypto mbedx509 wiiuse bte asnd ogc qrencode z bz2
+        PRIVATE curl wiisocket mbedtls mbedcrypto mbedx509 wiiuse bte asnd ogc z
 )

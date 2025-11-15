@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<app version="1">
+	<name>WiiLink Account Linker</name>
+	<version>v2.0.1</version>
+	<release_date>20251115000000</release_date>
+	<coder>Sketch</coder>
+	<short_description>Links your Wii to your WiiLink Account!</short_description>
+	<long_description>
+</long_description>
+<ahb_access/>
+</app>

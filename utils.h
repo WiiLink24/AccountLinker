@@ -6,6 +6,8 @@
 #include <vector>
 #include <iostream>
 
+const std::string version = "v2.0.1";
+
 struct File {
     void* data;
     size_t size;
@@ -23,7 +25,7 @@ inline void PrintHeader() {
     std::cout << std::endl;
     std::cout << std::endl;
     std::cout << "WiiLink Account Linker - (c) 2025 WiiLink" << std::endl;
-    std::cout << "v2.0" << std::endl;
+    std::cout << version << std::endl;
     std::cout << std::endl;
 }
 
