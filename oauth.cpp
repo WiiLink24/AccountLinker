@@ -18,19 +18,15 @@ bool OAuth::StartDeviceFlow() {
     m_response = http_post(DEVICE_PATH, post_data, headers);
 
     if (m_response.status_code == 200 && m_response.curl_code == CURLE_OK) {
-      break;
-    }
-
-    if (tries == 4) {
-      // JSON will probably be empty. Return and display message.
-      return false;
+      m_device_code = m_response.j["device_code"];
+      m_user_code = m_response.j["user_code"];
+      m_interval = m_response.j["interval"];
+      return true;
     }
   }
-
-  m_device_code = m_response.j["device_code"];
-  m_user_code = m_response.j["user_code"];
-  m_interval = m_response.j["interval"];
-  return true;
+  
+  // JSON will probably be empty. Return and display message.
+  return false;
 }
 
 std::string OAuth::GetErrorMessage() const{
