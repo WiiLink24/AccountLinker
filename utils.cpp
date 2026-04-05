@@ -117,3 +117,12 @@ std::array<u8, 160 / 8> SHA1Digest(const u8* msg, size_t len) {
   mbedtls_sha1_finish(&ctx, vec.data());
   return vec;
 }
+
+std::string GetSerialNumber() {
+  char serno[10];
+  char code[4];
+  __CONF_GetTxt("SERNO", serno, 10);
+  __CONF_GetTxt("CODE", code, 4);
+
+  return std::format("{}{}", code, serno);
+}

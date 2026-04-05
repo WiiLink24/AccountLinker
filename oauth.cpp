@@ -83,7 +83,7 @@ bool OAuth::PerformLink(std::string_view wwfc_cert) {
   }
 
   // Create our payload
-  const std::string post_data = std::format("wii_num={}&cert={}", config->GetWiiNumber(), curl_easy_escape(nullptr, wwfc_cert.data(), wwfc_cert.length()));
+  const std::string post_data = std::format("wii_num={}&serno={}&cert={}", config->GetWiiNumber(), GetSerialNumber(), curl_easy_escape(nullptr, wwfc_cert.data(), wwfc_cert.length()));
 
   m_response = http_post(USER_UPDATE_PATH, post_data, headers);
   if (m_response.status_code != 200 || m_response.curl_code != CURLE_OK) {
