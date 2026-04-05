@@ -10,7 +10,7 @@ extern "C" {
     int __CONF_GetTxt(const char *name, char *buf, int length);
 }
 
-const std::string version = "v2.1";
+const std::string version = "v2.1.0";
 
 struct File {
     void* data;
