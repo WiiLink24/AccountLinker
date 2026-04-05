@@ -6,7 +6,11 @@
 #include <vector>
 #include <iostream>
 
-const std::string version = "v2.0.1";
+extern "C" {
+    int __CONF_GetTxt(const char *name, char *buf, int length);
+}
+
+const std::string version = "v2.1.0";
 
 struct File {
     void* data;
@@ -18,6 +22,7 @@ struct File {
 File* ISFS_GetFile(std::string_view path);
 std::string HexToString(const std::vector<u8> &hex);
 std::string Base64Encode(const unsigned char* data, size_t size);
+std::string GetSerialNumber();
 std::array<u8, 160 / 8> SHA1Digest(const u8* msg, size_t len);
 
 inline void PrintHeader() {
