@@ -97,7 +97,7 @@ int main() {
     ClearScreen();
     PrintHeader();
     if (!success) {
-        const std::string msg = "Starting the device flow " + oauth.GetErrorMessage();
+        const std::string msg = "Starting the device flow: " + oauth.GetErrorMessage();
         DisplayError(msg);
         poll_home_button();
     }

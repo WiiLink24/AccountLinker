@@ -10,7 +10,7 @@ extern "C" {
     int __CONF_GetTxt(const char *name, char *buf, int length);
 }
 
-const std::string version = "v2.1.0";
+constexpr char version[] = "v2.2.0";
 
 struct File {
     void* data;
@@ -29,7 +29,7 @@ inline void PrintHeader() {
     std::cout << std::endl;
     std::cout << std::endl;
     std::cout << std::endl;
-    std::cout << "WiiLink Account Linker - (c) 2025 WiiLink" << std::endl;
+    std::cout << "WiiLink Account Linker - (c) 2026 WiiLink" << std::endl;
     std::cout << version << std::endl;
     std::cout << std::endl;
 }

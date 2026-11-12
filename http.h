@@ -8,9 +8,14 @@
 
 using json = nlohmann::json;
 
+enum JSONExceptionID : int {
+    SyntaxError = 101,
+};
+
 struct HTTPResponse {
     json j;
     std::string json_error;
+    int json_error_id;
     long status_code;
     CURLcode curl_code;
     std::string resp;

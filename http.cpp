@@ -37,16 +37,19 @@ HTTPResponse http_post(std::string_view url, std::string_view post_data, const s
 
   // Attempt to parse JSON
   json j{};
+  int err_id{};
   std::string json_error{};
   try {
     j = json::parse(response);
-  } catch (std::exception& e) {
+  } catch (json::exception& e) {
     json_error = e.what();
+    err_id = e.id;
   }
 
   return HTTPResponse{
           .j = j,
           .json_error = json_error,
+          .json_error_id = err_id,
           .status_code = http_code,
           .curl_code = res,
           .resp = response,

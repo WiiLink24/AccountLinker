@@ -32,6 +32,9 @@ bool OAuth::StartDeviceFlow() {
 std::string OAuth::GetErrorMessage() const{
   // First check if we have a JSON error.
   if (!m_response.json_error.empty()) {
+    if (m_response.json_error_id == SyntaxError)
+      return "JSON syntax error";
+
     return m_response.json_error;
   }
 
